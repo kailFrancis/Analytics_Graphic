@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D3.js Plot from Excel Data</title>
+  <!-- Include D3.js library -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    .CRrectangle { /* CR = "candidate result" */
+      fill: white;
+      stroke: black;
+      stroke-width: 2;
+    }
+    .CRfully-filled {
+      fill: darkblue;
+    }
+    .CRlightly-filled {
+      fill: lightblue;
+    }
+    .CRmoderately-filled {
+      fill: cornflowerblue;
+    }
+    .CRmostly-filled {
+      fill: blue;
+    }
+    .TCAPrectangle { /* TCAP = TCAP 360 */
+      fill: white;
+      stroke: black;
+      stroke-width: 2;
+    }
+    .TCAPfully-filled {
+      fill: purple;
+    }
+    .TCAPlightly-filled {
+      fill: lavender;
+    }
+    .TCAPmoderately-filled {
+      fill: mediumpurple;
+    }
+    .TCAPmostly-filled {
+      fill: darkorchid;
+    }
+    .RA-rectangle { /* RA = rating alignment */
+      fill: white;
+      stroke: black;
+      stroke-width: 2;
+    }
+    .RA-green {
+      fill: green;
+    }
+    .RA-orange {
+      fill: orange;
+    }
+    .RA-red {
+      fill: red;
+    }
+    .smallRectRHSText {
+      font-size: 20px;
+      font-family: sans-serif; 
+    }
+    .ratingAlignmentText {
+      font-size: 50px;
+      font-family: sans-serif;
+    }
+
+    #Rows1and2Container {
+      display: flex;
+      flex-direction: column; /* Stacking vertically */
+    }
+    #totalContainer {
+      display: flex;
+      flex-direction: row; /* Stacking vertically */
+    }
+    
+  </style>
+</head>
+<body>
+
+    <div id="totalContainer">
+
+    <div id="Rows1and2Container">
+        <div id="plot-rectangleRow1Container"></div>
+        <div id="plot-rectangleRow2Container"></div>
+    </div>
+
+        <div id="plot-largeRectangleContainer"></div>
+    </div>
+
+
+
+  <script>
+
+    // load data
+    d3.csv("sample_data_for_graphic.csv").then(data => {
+    
+        // get important values
+        let overallTcapScore = data[1]["TCAP 360 (max 5)"];
+        let overallCrScore = data[1]["Candidate Result (max 5)"];
+        let overallRating = data[1]["Adjusted result based on rating (%)"];
+
+        // set inputNumbers
+        const inputNumber1 = overallTcapScore; // Adjust this input number
+        const inputNumber2 = overallCrScore; // Adjust this input number
+        const inputNumber3 = Math.round(overallRating); // Adjust this input number
+
+        // Define dimensions
+        const rectWidth = 50;
+        const rectHeight = 30;
+        const spacing = 8;
+
+        const largeRectWidth = 80;
+        const largerRectHeight = 50;
+        const largeSpacing = 60;
+
+        const svgWidth = rectWidth*5 + spacing*4 + largeSpacing;
+        const svgHeight = 50;
+        const largeSvgWidth = 1000;
+        const largeSvgHeight = 100;
+
+
+        // Create containers
+        const rectangleRow1Container = d3.select("#plot-rectangleRow1Container")
+            .append("svg")
+            .attr("width", svgWidth)
+            .attr("height", svgHeight);
+        
+        const rectangleRow2Container = d3.select("#plot-rectangleRow2Container")
+            .append("svg")
+            .attr("width", svgWidth)
+            .attr("height", svgHeight);
+
+        const largeRectangleContainer = d3.select("#plot-largeRectangleContainer")
+            .append("svg")
+            .attr("width", largeSvgWidth)
+            .attr("height", largeSvgHeight);
+        
+
+        // Create rectangle data
+        const rectangleRow1 = rectangleRow1Container.selectAll("rect")
+        .data(Array.from({ length: 5 })) // Create an array with 5 elements
+        .enter()
+        .append("rect")
+        .attr("x", (d, i) => i * (rectWidth + spacing))
+        .attr("y", (svgHeight - rectHeight) / 2)
+        .attr("width", rectWidth)
+        .attr("height", rectHeight)
+        .attr("rx", 4) // Rounded corner radius
+        .attr("class", (d, i) => {
+            if (inputNumber1 >= i + 1) {
+            return "CRfully-filled";
+            } else if (inputNumber1 >= i) {
+            const fractionalPart = inputNumber1 - i;
+            if (fractionalPart <= 0) {
+                return "CRrectangle";
+            } else if (fractionalPart < 0.33) {
+                return "CRlightly-filled";
+            } else if (fractionalPart < 0.66) {
+                return "CRmoderately-filled";
+            } else if (fractionalPart < 1) {
+                return "CRmostly-filled";
+            }
+            }
+            return "CRrectangle";
+        });
+
+
+        const rectangleRow2 = rectangleRow2Container.selectAll("rect")
+        .data(Array.from({ length: 5 })) // Create an array with 5 elements
+        .enter()
+        .append("rect")
+        .attr("x", (d, i) => i * (rectWidth + spacing))
+        .attr("y", (svgHeight - rectHeight) / 2)
+        .attr("width", rectWidth)
+        .attr("height", rectHeight)
+        .attr("rx", 4) // Rounded corner radius
+        .attr("class", (d, i) => {
+            if (inputNumber2 >= i + 1) {
+                return "TCAPfully-filled";
+            } else if (inputNumber2 >= i) {
+                const fractionalPart = inputNumber2 - i;
+                if (fractionalPart <= 0) {
+                    return "TCAPrectangle";
+                } else if (fractionalPart < 0.33) {
+                    return "TCAPlightly-filled";
+                } else if (fractionalPart < 0.66) {
+                    return "TCAPmoderately-filled";
+                } else if (fractionalPart < 1) {
+                    return "TCAPmostly-filled";
+                }
+            }
+            return "TCAPrectangle";
+        });
+        
+
+        // Add text label only for the rightmost rectangle in each instance
+        const rightmostX1 = (rectWidth + spacing) * (rectangleRow1.size() - 1);
+        rectangleRow1Container.append("text")
+            .attr("x", rightmostX1 + rectWidth + spacing) // Position to the right of the rightmost rectangle
+            .attr("y", svgHeight / 2)
+            .attr("dy", "0.32em")
+            .attr("class", "smallRectRHSText")
+            .text(inputNumber1.toString());
+
+        const rightmostX2 = (rectWidth + spacing) * (rectangleRow2.size() - 1);
+        rectangleRow2Container.append("text")
+            .attr("x", rightmostX2 + rectWidth + spacing) // Position to the right of the rightmost rectangle
+            .attr("y", svgHeight / 2)
+            .attr("dy", "0.32em")
+            .attr("class", "smallRectRHSText")
+            .text(inputNumber2.toString());
+        
+
+        // Create the larger rectangle and apply shading based on inputNumber3
+        const largerRectangle = largeRectangleContainer.append("rect")
+            .attr("x", 10)
+            .attr("y", 0)
+            .attr("width", largeRectWidth * 2)
+            .attr("height", largerRectHeight * 2)
+            .attr("rx", 15)
+            .attr("class", () => {
+                if (inputNumber3 >= 80 && inputNumber3 <= 100) {
+                return "RA-green";
+                } else if (inputNumber3 >= 60 && inputNumber3 < 80) {
+                return "RA-orange";
+                } else {
+                return "RA-red";
+                }
+        });
+
+        // Add the inputNumber3 text inside the larger rectangle
+        largeRectangleContainer.append("text")
+            .attr("x", 5)
+            .attr("y", 40)
+            .attr("dy", largerRectHeight/2)
+            .attr("dx", largeRectWidth/2)
+            .attr("class", "ratingAlignmentText")
+            .text(inputNumber3.toString() + "%");
+
+    })
+  </script>
+</body>
+</html>
